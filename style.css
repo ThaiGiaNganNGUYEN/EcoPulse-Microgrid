@@ -1,0 +1,75 @@
+*{box-sizing:border-box}
+:root{
+  --bg:#0a0b10; --card:#121521; --muted:#96a0b5; --accent:#82cfff; --text:#e7eefb;
+  --good:#37d67a; --warn:#ffad33; --bad:#ff5d5d; --pulse:#00ffc6;
+}
+html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:radial-gradient(1200px 600px at 10% -10%, #1b2240, transparent),var(--bg);color:var(--text)}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;position:sticky;top:0;z-index:10;backdrop-filter:blur(6px);background:linear-gradient(0deg,rgba(10,11,16,.0),rgba(10,11,16,.6));border-bottom:1px solid #1e2235}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.badge.ai{margin-left:8px;padding:4px 8px;border:1px solid #274a62;border-radius:999px;background:linear-gradient(180deg,rgba(130,207,255,.15),rgba(130,207,255,.05));font-size:.8rem;color:#bfe5ff}
+.badge.ai::after{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pulse);margin-left:6px;box-shadow:0 0 10px var(--pulse);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%{opacity:.25;transform:scale(.9)}50%{opacity:1;transform:scale(1.2)}100%{opacity:.25;transform:scale(.9)}}
+h1{font-size:1.2rem;margin:0}
+.controls{display:flex;align-items:center;gap:10px;color:var(--muted)}
+select,.btn,input{background:var(--card);color:var(--text);border:1px solid #2a2f45;padding:8px 10px;border-radius:10px;font:inherit}
+.btn{cursor:pointer;transition:transform .06s ease,box-shadow .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(130,207,255,.15)}
+.btn-ghost{background:transparent;border-color:#2a2f45}
+.small{font-size:.85rem;padding:6px 8px}
+.toggle{display:flex;align-items:center;gap:8px;color:var(--muted)}
+main{padding:20px;max-width:1300px;margin:0 auto}
+.grid{display:grid;gap:18px;margin-bottom:18px}
+.grid.two{grid-template-columns:1fr 1fr}
+.grid.one{grid-template-columns:1fr}
+@media (max-width: 920px){ .grid.two{grid-template-columns:1fr} }
+.card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));border:1px solid #1e2235;border-radius:16px;padding:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02)}
+.card-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.card-header.with-actions{align-items:center}
+.card h2{font-size:1.05rem;margin:0}
+.caption{color:var(--muted);font-size:.9rem}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+@media (max-width:920px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{display:flex;flex-direction:column;gap:4px}
+.kpi-label{color:var(--muted);font-size:.9rem}
+.kpi-value{font-size:1.8rem;font-weight:700}
+.kpi-sub{color:var(--muted);font-size:.8rem}
+.alerts,.anoms{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.alerts li,.anoms li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#0f1321;border:1px solid #222741}
+.anoms li .pill{padding:2px 8px;border-radius:999px;font-size:.75rem}
+.pill.low{background:rgba(55,214,122,.12);color:#9ef3c2;border:1px solid rgba(55,214,122,.3)}
+.pill.med{background:rgba(255,173,51,.12);color:#ffd9a1;border:1px solid rgba(255,173,51,.3)}
+.pill.high{background:rgba(255,93,93,.12);color:#ffc0c0;border:1px solid rgba(255,93,93,.3);box-shadow:0 0 16px rgba(255,93,93,.15), inset 0 0 18px rgba(255,93,93,.08);animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%{box-shadow:0 0 10px rgba(255,93,93,.2), inset 0 0 12px rgba(255,93,93,.06)}50%{box-shadow:0 0 24px rgba(255,93,93,.6), inset 0 0 26px rgba(255,93,93,.15)}100%{box-shadow:0 0 10px rgba(255,93,93,.2), inset 0 0 12px rgba(255,93,93,.06)}}
+.factors{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.factors .factor{display:flex;flex-direction:column;gap:6px}
+.factors label{color:var(--muted);font-size:.85rem}
+footer{padding:18px 20px;color:var(--muted);text-align:center;font-size:.9rem;border-top:1px solid #1e2235}
+canvas{width:100%}
+.heat-strip{height:14px;border-radius:10px;margin-top:10px;background:linear-gradient(90deg,#0f1321,#0f1321);position:relative;overflow:hidden;border:1px solid #222741}
+.heat-cell{position:absolute;top:0;bottom:0}
+
+
+
+/*
+// === Fix: make anomaly chart fill the card (no blank gap) === 
+.anomaly-row .card {               //affect only the two anomaly cards 
+  display: flex;
+  flex-direction: column;
+}
+#anomalyScoreChart {               // let the canvas expand vertically 
+  flex: 1 1 auto;
+  height: auto !important;         //ignore any inline/attribute height 
+  min-height: 360px;               // keep a sensible minimum 
+  width: 100% !important;
+}
+#heatStrip {                       //keep the heat strip a fixed size 
+  flex: 0 0 12px;
+}
+.anomaly-row #anomList {           //right-side list continues to fill 
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+*/

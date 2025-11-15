@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Microgrid Unified Dashboard + AI Anomalies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="dot"></div>
+      <h1>Microgrid Unified Dashboard</h1>
+      <span class="badge ai">AI Anomalies</span>
+    </div>
+    <div class="controls">
+      <label for="timeRange">Range</label>
+      <select id="timeRange">
+        <option value="day" selected>Today (24h)</option>
+        <option value="week">Week</option>
+      </select>
+      <label for="scenario">Scenario</label>
+      <select id="scenario">
+        <option value="baseline" selected>Baseline</option>
+        <option value="cloudy">Cloudy Day</option>
+        <option value="windy">Windy Day</option>
+        <option value="peak">High Demand</option>
+      </select>
+      <label for="refreshSel">Auto-Refresh</label>
+      <select id="refreshSel">
+        <option value="0" selected>Off</option>
+        <option value="30">30s</option>
+        <option value="60">60s</option>
+      </select>
+      <button id="applyBtn" class="btn">Apply</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="card kpi">
+        <div class="kpi-label">Renewables Share</div>
+        <div class="kpi-value" id="kpiRenewables">—</div>
+        <div class="kpi-sub">of total supply</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">CO₂ Avoided</div>
+        <div class="kpi-value" id="kpiCO2">—</div>
+        <div class="kpi-sub">kg vs. gas-only</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">Est. Energy Cost</div>
+        <div class="kpi-value" id="kpiCost">—</div>
+        <div class="kpi-sub">today</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">Peak Demand</div>
+        <div class="kpi-value" id="kpiPeak">—</div>
+        <div class="kpi-sub">today</div>
+      </div>
+    </section>
+
+    
+
+    <!-- Sustainability & Finance (kept in v3 position) -->
+    <section class="grid one">
+      <div class="card">
+        <div class="card-header">
+          <h2>Sustainability & Finance</h2>
+          <span class="caption">Edit factors then Recalculate</span>
+        </div>
+        <div class="factors">
+          <div class="factor">
+            <label>Gas CO₂ factor (kg/kWh)</label>
+            <input id="efGas" type="number" step="0.01" value="0.45" />
+          </div>
+          <div class="factor">
+            <label>Cost: Solar ($/kWh)</label>
+            <input id="cSolar" type="number" step="0.01" value="0.05" />
+          </div>
+          <div class="factor">
+            <label>Cost: Wind ($/kWh)</label>
+            <input id="cWind" type="number" step="0.01" value="0.05" />
+          </div>
+          <div class="factor">
+            <label>Cost: Gas ($/kWh)</label>
+            <input id="cGas" type="number" step="0.01" value="0.20" />
+          </div>
+          <button id="recalcBtn" class="btn">Recalculate KPIs</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supply vs Demand + Gen Mix -->
+    <section class="grid two">
+      <div class="card">
+        <div class="card-header with-actions">
+          <div>
+            <h2>Supply vs. Demand</h2>
+            <span class="caption">Live-like telemetry</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost small" data-dl="supplyDemand">Download PNG</button>
+          </div>
+        </div>
+        <canvas id="supplyDemandChart" height="110"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header with-actions">
+          <div>
+            <h2>Generation Mix</h2>
+            <span class="caption">Solar / Wind / Gas (stacked)</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost small" data-dl="genMix">Download PNG</button>
+          </div>
+        </div>
+        <canvas id="genMixChart" height="110"></canvas>
+      </div>
+    </section>
+
+    <!-- Battery -->
+    <section class="grid two">
+      <div class="card">
+        <div class="card-header with-actions">
+          <div>
+            <h2>Battery State of Charge</h2>
+            <span class="caption">%</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost small" data-dl="soc">Download PNG</button>
+          </div>
+        </div>
+        <canvas id="socChart" height="110"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header with-actions">
+          <div>
+            <h2>Battery Charge / Discharge</h2>
+            <span class="caption">kW (+ charging)</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost small" data-dl="battFlow">Download PNG</button>
+          </div>
+        </div>
+        <canvas id="battFlowChart" height="110"></canvas>
+      </div>
+    </section>
+
+    <!-- Past Comparison -->
+    <section class="grid one">
+      <div class="card">
+        <div class="card-header with-actions">
+          <div>
+            <h2>Past Records Comparison</h2>
+            <span class="caption">Daily totals vs. today</span>
+          </div>
+          <div class="actions">
+            <button id="dlCsvBtn" class="btn btn-ghost small">Download CSV (Today)</button>
+            <button class="btn btn-ghost small" data-dl="past">Download PNG</button>
+          </div>
+        </div>
+        <canvas id="pastComparisonChart" height="110"></canvas>
+      </div>
+    </section>
+
+    <!-- AI ANOMALIES -->
+    <section class="grid two">
+      <div class="card">
+        <div class="card-header with-actions">
+          <div>
+            <h2>AI Anomaly Score</h2>
+            <span class="caption">Robust multi-signal score</span>
+          </div>
+          <div class="actions">
+            <label class="toggle">
+              Sensitivity
+              <select id="sensSel">
+                <option value="2.8">Low</option>
+                <option value="2.4" selected>Medium</option>
+                <option value="2.0">High</option>
+              </select>
+            </label>
+            <button class="btn btn-ghost small" data-dl="anomScore">Download PNG</button>
+          </div>
+        </div>
+        <canvas id="anomalyScoreChart" height="110"></canvas>
+        <div id="heatStrip" class="heat-strip"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Detected Events</h2>
+          <span class="caption">Flashy + explainable</span>
+        </div>
+        <ul id="anomList" class="anoms"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>©Team Mugiwara- EcoPulse Hackathon 2025</p>
+  </footer>
+
+  <script src="index.js"></script>
+</body>
+</html>
